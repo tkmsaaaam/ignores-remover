@@ -13,6 +13,9 @@ type Request struct {
 	file string
 }
 
+var osGetwd = os.Getwd
+var osStat = os.Stat
+
 func main() {
 	arg := getArg()
 
@@ -45,14 +48,14 @@ func getArg() string {
 
 func makeRequest(arg string) *Request {
 	if arg == "" {
-		dir, e := os.Getwd()
+		dir, e := osGetwd()
 		if e != nil {
 			log.Println("can not get working directory: ", e)
 			return nil
 		}
 		return &Request{path: dir + "/", file: ".gitignore"}
 	} else {
-		stat, e := os.Stat(arg)
+		stat, e := osStat(arg)
 		if e != nil {
 			log.Println("can not discriminate arg (directory or file): ", e)
 			return nil
@@ -66,7 +69,7 @@ func makeRequest(arg string) *Request {
 		} else {
 			l := strings.Split(arg, "/")
 			if len(l) == 1 {
-				dir, e := os.Getwd()
+				dir, e := osGetwd()
 				if e != nil {
 					log.Println("can not get working directory: ", e)
 					return nil
