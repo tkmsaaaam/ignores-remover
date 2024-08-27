@@ -55,6 +55,12 @@ func TestMakeRequest(t *testing.T) {
 			want:    Request{path: "/path/to/", file: ".gitignore"},
 		},
 		{
+			name:    "ArgIsFullPathToFile",
+			request: "/path/to/.dockerignore",
+			isDir:   false,
+			want:    Request{path: "/path/to/", file: ".dockerignore"},
+		},
+		{
 			name:    "ArgIsFile",
 			request: ".dockerignore",
 			isDir:   false,

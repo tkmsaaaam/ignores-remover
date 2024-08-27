@@ -77,7 +77,7 @@ func makeRequest(arg string) *Request {
 				return &Request{path: dir + "/", file: l[0]}
 			} else {
 				fileName := l[len(l)-1]
-				path := arg[0 : len(arg)-len(l)]
+				path := arg[0 : len(arg)-len(fileName)]
 				return &Request{path: path, file: fileName}
 			}
 		}
