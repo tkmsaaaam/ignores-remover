@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io/fs"
 	"testing"
 	"time"
@@ -30,41 +31,77 @@ func (impl Impl) Sys() any {
 }
 
 func TestMakeRequest(t *testing.T) {
+	type GetWd struct {
+		path string
+		err  error
+	}
+	type Stat struct {
+		isDir bool
+		err   error
+	}
+
 	tests := []struct {
 		name    string
 		request string
-		isDir   bool
-		want    Request
+		stat    Stat
+		getWd   GetWd
+		want    *Request
 	}{
 		{
 			name:    "NoArg",
 			request: "",
-			isDir:   true,
-			want:    Request{path: "/path/to/", file: ".gitignore"},
+			stat:    Stat{isDir: true, err: nil},
+			getWd:   GetWd{path: "/path/to", err: nil},
+			want:    &Request{path: "/path/to/", file: ".gitignore"},
+		},
+		{
+			name:    "NoArgError",
+			request: "",
+			stat:    Stat{isDir: true, err: nil},
+			getWd:   GetWd{path: "", err: errors.New("")},
+			want:    nil,
 		},
 		{
 			name:    "ArgIsPath",
 			request: "/path/to",
-			isDir:   true,
-			want:    Request{path: "/path/to/", file: ".gitignore"},
+			stat:    Stat{isDir: true, err: nil},
+			getWd:   GetWd{path: "/path/to", err: nil},
+			want:    &Request{path: "/path/to/", file: ".gitignore"},
 		},
 		{
 			name:    "ArgIsPathSuffixTrue",
 			request: "/path/to/",
-			isDir:   true,
-			want:    Request{path: "/path/to/", file: ".gitignore"},
+			stat:    Stat{isDir: true, err: nil},
+			getWd:   GetWd{path: "/path/to", err: nil},
+			want:    &Request{path: "/path/to/", file: ".gitignore"},
 		},
 		{
 			name:    "ArgIsFullPathToFile",
 			request: "/path/to/.dockerignore",
-			isDir:   false,
-			want:    Request{path: "/path/to/", file: ".dockerignore"},
+			stat:    Stat{isDir: false, err: nil},
+			getWd:   GetWd{path: "/path/to", err: nil},
+			want:    &Request{path: "/path/to/", file: ".dockerignore"},
 		},
 		{
 			name:    "ArgIsFile",
 			request: ".dockerignore",
-			isDir:   false,
-			want:    Request{path: "/path/to/", file: ".dockerignore"},
+			stat:    Stat{isDir: false, err: nil},
+			getWd:   GetWd{path: "/path/to", err: nil},
+			want:    &Request{path: "/path/to/", file: ".dockerignore"},
+		},
+		{
+			name:    "ArgIsFileError",
+			request: ".dockerignore",
+			stat:    Stat{isDir: false, err: nil},
+			getWd:   GetWd{path: "", err: errors.New("")},
+			want:    nil,
+		},
+		{
+			name:    "statIsError",
+			request: "/path/to",
+			stat:    Stat{isDir: false, err: errors.New("")},
+			getWd:   GetWd{path: "/path/to/", err: nil},
+			want:    nil,
 		},
 	}
 	for _, tt := range tests {
@@ -74,24 +111,31 @@ func TestMakeRequest(t *testing.T) {
 			originalOsGetwd := osGetwd
 			defer func() { osGetwd = originalOsGetwd }()
 			osGetwd = func() (string, error) {
-				return "/path/to", nil
+				return tt.getWd.path, tt.getWd.err
 			}
 
 			originalOsStat := osStat
 			defer func() { osStat = originalOsStat }()
 			osStat = func(name string) (fs.FileInfo, error) {
-				isDir = tt.isDir
-				return Impl{}, nil
+				isDir = tt.stat.isDir
+				return Impl{}, tt.stat.err
 			}
 
 			actual := makeRequest(tt.request)
 
-			if actual.path != tt.want.path {
-				t.Errorf("makeRequest() path = %v, want %v", actual.path, tt.want.path)
+			if tt.want != nil {
+				if actual.path != tt.want.path {
+					t.Errorf("makeRequest() path = %v, want %v", actual.path, tt.want.path)
+				}
+				if actual.file != tt.want.file {
+					t.Errorf("makeRequest() file = %v, want %v", actual.path, tt.want.path)
+				}
+			} else {
+				if actual != nil {
+					t.Errorf("makeRequest() is not nil %v", actual)
+				}
 			}
-			if actual.file != tt.want.file {
-				t.Errorf("makeRequest() file = %v, want %v", actual.path, tt.want.path)
-			}
+
 		})
 	}
 }
