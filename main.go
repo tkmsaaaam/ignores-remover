@@ -51,7 +51,7 @@ func isDryRun() bool {
 	if len(os.Args) < 3 {
 		return false
 	}
-	return strings.EqualFold(os.Args[2], "--dryRun=true")
+	return strings.EqualFold(os.Args[2], "--dryRun=true") || strings.EqualFold(os.Args[2], "-d=true")
 }
 
 func makeRequest(arg string) *Request {
