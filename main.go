@@ -44,14 +44,26 @@ func getTarget() string {
 	if len(os.Args) < 2 {
 		return ""
 	}
-	return os.Args[1]
+	for _, v := range os.Args {
+		if v == "" {
+			return ""
+		}
+		if strings.HasPrefix(v, "--dryRun=") || strings.HasPrefix(v, "-d=") {
+			continue
+		}
+		return v
+	}
+	return ""
 }
 
 func isDryRun() bool {
-	if len(os.Args) < 3 {
+	if len(os.Args) < 2 {
 		return false
 	}
-	return strings.EqualFold(os.Args[2], "--dryRun=true") || strings.EqualFold(os.Args[2], "-d=true")
+	for _, v := range os.Args {
+		return strings.EqualFold(v, "--dryRun=true") || strings.EqualFold(v, "-d=true")
+	}
+	return false
 }
 
 func makeRequest(arg string) *Request {
