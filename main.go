@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"log"
 	"os"
 	"path/filepath"
@@ -41,29 +42,21 @@ func main() {
 }
 
 func getTarget() string {
-	if len(os.Args) < 2 {
-		return ""
+	short := flag.String("t", "", "dryRun")
+	if *short != "" {
+		return *short
 	}
-	for _, v := range os.Args {
-		if v == "" {
-			return ""
-		}
-		if strings.HasPrefix(v, "--dryRun=") || strings.HasPrefix(v, "-d=") {
-			continue
-		}
-		return v
-	}
-	return ""
+	long := flag.String("target", "", "dryRun")
+	return *long
 }
 
 func isDryRun() bool {
-	if len(os.Args) < 2 {
-		return false
+	short := flag.Bool("d", false, "dryRun")
+	if *short == true {
+		return true
 	}
-	for _, v := range os.Args {
-		return strings.EqualFold(v, "--dryRun=true") || strings.EqualFold(v, "-d=true")
-	}
-	return false
+	long := flag.Bool("dryRun", false, "dryRun")
+	return *long == true
 }
 
 func makeRequest(arg string) *Request {
