@@ -42,21 +42,17 @@ func main() {
 }
 
 func getTarget() string {
-	short := flag.String("t", "", "dryRun")
-	if *short != "" {
+	if short := flag.String("t", "", "dryRun"); *short != "" {
 		return *short
 	}
-	long := flag.String("target", "", "dryRun")
-	return *long
+	return *flag.String("target", "", "dryRun")
 }
 
 func isDryRun() bool {
-	short := flag.Bool("d", false, "dryRun")
-	if *short == true {
+	if *flag.Bool("d", false, "dryRun") {
 		return true
 	}
-	long := flag.Bool("dryRun", false, "dryRun")
-	return *long == true
+	return *flag.Bool("dryRun", false, "dryRun")
 }
 
 func makeRequest(arg string) *Request {
