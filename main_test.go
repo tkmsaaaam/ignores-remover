@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"io/fs"
 	"testing"
 	"time"
@@ -28,6 +29,48 @@ func (impl Impl) ModTime() time.Time {
 }
 func (impl Impl) Sys() any {
 	return nil
+}
+
+func TestGetTarget(t *testing.T) {
+	tests := []struct {
+		name    string
+		request map[string]string
+		want    string
+	}{
+		{
+			name:    "NoArg",
+			request: map[string]string{},
+			want:    "",
+		},
+		{
+			name:    "ShortOnly",
+			request: map[string]string{"t": "/path/to"},
+			want:    "/path/to",
+		},
+		{
+			name:    "LongOnly",
+			request: map[string]string{"target": "/path/to"},
+			want:    "/path/to",
+		},
+		{
+			name:    "Both",
+			request: map[string]string{"target": "/path/to", "t": "/path/to/"},
+			want:    "/path/to/",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Helper()
+			for k, v := range tt.request {
+				flag.Set(k, v)
+			}
+			actual := getTarget()
+			if tt.want != actual {
+				t.Errorf("getTarget() is not nil %v", actual)
+			}
+
+		})
+	}
 }
 
 func TestMakeRequest(t *testing.T) {

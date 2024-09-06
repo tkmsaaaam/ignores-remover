@@ -41,25 +41,27 @@ func main() {
 	}
 }
 
+var t string
+var target string
+var d bool
+var dryRun bool
+
+func init() {
+	flag.StringVar(&t, "t", "", "dryRun")
+	flag.StringVar(&target, "target", "", "dryRun")
+	flag.BoolVar(&d, "d", false, "dryRun")
+	flag.BoolVar(&dryRun, "dryRun", false, "dryRun")
+}
+
 func getTarget() string {
-	var short string
-	flag.StringVar(&short, "t", "", "dryRun")
-	if short != "" {
-		return short
+	if t != "" {
+		return t
 	}
-	var long string
-	flag.StringVar(&long, "target", "", "dryRun")
-	return long
+	return target
 }
 
 func isDryRun() bool {
-	var short bool
-	if flag.BoolVar(&short, "d", false, "dryRun"); short {
-		return true
-	}
-	var long bool
-	flag.BoolVar(&long, "dryRun", false, "dryRun")
-	return long
+	return d || dryRun
 }
 
 func makeRequest(arg string) *Request {
