@@ -73,6 +73,58 @@ func TestGetTarget(t *testing.T) {
 	}
 }
 
+func TestIsDryRun(t *testing.T) {
+	tests := []struct {
+		name    string
+		request map[string]string
+		want    bool
+	}{
+		{
+			name:    "NoArg",
+			request: map[string]string{},
+			want:    false,
+		},
+		{
+			name:    "ShortOnly",
+			request: map[string]string{"d": "true"},
+			want:    true,
+		},
+		{
+			name:    "ShortOnlyFalse",
+			request: map[string]string{"d": "false"},
+			want:    false,
+		},
+		{
+			name:    "LongOnly",
+			request: map[string]string{"dryRun": "true"},
+			want:    true,
+		},
+		{
+			name:    "LongOnlyFalse",
+			request: map[string]string{"dryRun": "false"},
+			want:    false,
+		},
+		{
+			name:    "Both",
+			request: map[string]string{"dryRun": "false", "d": "true"},
+			want:    true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Helper()
+			for k, v := range tt.request {
+				flag.Set(k, v)
+			}
+			actual := isDryRun()
+			if tt.want != actual {
+				t.Errorf("getTarget() is not nil %v", actual)
+			}
+
+		})
+	}
+}
+
 func TestMakeRequest(t *testing.T) {
 	type GetWd struct {
 		path string
