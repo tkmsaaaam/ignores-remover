@@ -28,7 +28,7 @@ func main() {
 
 	fp, err := os.Open(request.path + request.file)
 	if err != nil {
-		log.Println("ignore file is not present", request.path+request.file)
+		log.Println("Can not open file", request.path+request.file, err)
 	}
 	defer fp.Close()
 
@@ -112,8 +112,12 @@ func delete(path, pattern string, dryRun bool) {
 		if dryRun {
 			log.Println("remove(without dryRun): ", v)
 		} else {
-			os.Remove(v)
-			log.Println("removed: ", v)
+			e := os.Remove(v)
+			if e != nil {
+				log.Println("Can not remove", e)
+			} else {
+				log.Println("removed: ", v)
+			}
 		}
 	}
 }
