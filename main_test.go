@@ -66,9 +66,8 @@ func TestGetTarget(t *testing.T) {
 			}
 			actual := getTarget()
 			if tt.want != actual {
-				t.Errorf("getTarget() is not nil %v", actual)
+				t.Errorf("getTarget() want = %v, actual = %v", tt.want, actual)
 			}
-
 		})
 	}
 }
@@ -118,7 +117,7 @@ func TestIsDryRun(t *testing.T) {
 			}
 			actual := isDryRun()
 			if tt.want != actual {
-				t.Errorf("getTarget() is not nil %v", actual)
+				t.Errorf("isDryRun() want = %v, actual = %v", tt.want, actual)
 			}
 
 		})
