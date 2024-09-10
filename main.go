@@ -23,6 +23,7 @@ func main() {
 
 	request := makeRequest(target)
 	if request == nil {
+		log.Println("can not continue to process")
 		return
 	}
 
